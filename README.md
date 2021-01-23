@@ -1,4 +1,4 @@
-![experimental-setup](D:\Synth\[Firmware]\O_C-for-SSD1309-2.4-inch-display\experimental-setup.jpg)
+![experimental-setup](experimental-setup.jpg)
 
 **Experimental branch!!!**
 
@@ -11,8 +11,8 @@ New Haven's 2.7" display (as used in Monome Teletype), which uses SSD1322, won't
 
 *Transfer of one OLED GDDRAM page (see [SSD1309 datasheet](https://datasheetspdf.com/pdf/1017173/SolomonSystech/SSD1309/1), page 24)*
 
-![DSView-one-page](D:\Synth\[Firmware]\O_C-for-SSD1309-2.4-inch-display\DSView-one-page.png)
+![DSView-one-page](DSView-one-page.png)
 
 *All eight pages:*
 
-![DSView-eight-pages](D:\Synth\[Firmware]\O_C-for-SSD1309-2.4-inch-display\DSView-eight-pages.png)
+![DSView-eight-pages](DSView-eight-pages.png)
