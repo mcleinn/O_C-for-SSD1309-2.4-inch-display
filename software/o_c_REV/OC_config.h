@@ -9,7 +9,7 @@
 // 66us = 15.1515...kHz
 // 72us = 13.888...kHz
 // 100us = 10Khz
-static constexpr uint32_t OC_CORE_ISR_FREQ = 16666U;
+static constexpr uint32_t OC_CORE_ISR_FREQ = 6300;
 static constexpr uint32_t OC_CORE_TIMER_RATE = (1000000UL / OC_CORE_ISR_FREQ);
 static constexpr uint32_t OC_UI_TIMER_RATE   = 1000UL;
 

@@ -41,8 +41,6 @@
 #include "OC_autotune_presets.h"
 #include "OC_autotune.h"
 
-#define SPICLOCK_30MHz   (SPI_CTAR_PBR(0) | SPI_CTAR_BR(0) | SPI_CTAR_DBR) //(60 / 2) * ((1+1)/2) = 30 MHz (= 24MHz, when F_BUS == 48000000)
-
 namespace OC {
 
 /*static*/

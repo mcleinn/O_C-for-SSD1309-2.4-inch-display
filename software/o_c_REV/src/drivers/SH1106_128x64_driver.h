@@ -25,6 +25,7 @@
 
 #include <stdint.h>
 #include <string.h>
+void changeSpeed(uint32_t speed);
 
 struct SH1106_128x64_Driver {
   static constexpr size_t kFrameSize = 128 * 64 / 8;
