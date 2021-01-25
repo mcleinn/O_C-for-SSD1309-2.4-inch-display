@@ -83,25 +83,25 @@ void SH1106_128x64_Driver::Init() {
 
   // u8g_dev_ssd1306_128x64_adafruit3_init_seq
   digitalWriteFast(OLED_CS, OLED_CS_INACTIVE); // U8G_ESC_CS(0),    
-  changeSpeed(SPICLOCK_30MHz);
+  ChangeSpeed(SPICLOCK_30MHz);
   digitalWriteFast(OLED_DC, LOW); // U8G_ESC_ADR(0),           /* instruction mode */
 
   digitalWriteFast(OLED_RST, LOW); // U8G_ESC_RST(1),           /* do reset low pulse with (1*16)+2 milliseconds */
   delay(20);
   digitalWriteFast(OLED_RST, HIGH);
   delay(20);
-  changeSpeed(SPI_CLOCK_8MHz);
+  ChangeSpeed(SPI_CLOCK_8MHz);
   digitalWriteFast(OLED_CS, OLED_CS_ACTIVE); // U8G_ESC_CS(1),             /* enable chip */
 
   SPI_send(SH1106_init_seq, sizeof(SH1106_init_seq));
 
   digitalWriteFast(OLED_CS, OLED_CS_INACTIVE); // U8G_ESC_CS(0), 
-  changeSpeed(SPICLOCK_30MHz);
+  ChangeSpeed(SPICLOCK_30MHz);
 
 #ifdef DMA_PAGE_TRANSFER
   page_dma.destination((volatile uint8_t&)SPI0_PUSHR);
   page_dma.transferSize(1);
-  page_dma.transferCount(kPageSize);
+  page_dma.transferCount(kSubpageSize);
   page_dma.disableOnCompletion();
   page_dma.triggerAtHardwareEvent(DMAMUX_SOURCE_SPI0_TX);
   page_dma.disable();
@@ -115,7 +115,7 @@ void SH1106_128x64_Driver::Flush() {
 #ifdef DMA_PAGE_TRANSFER
   // Assume DMA transfer has completed, else we're doomed
   digitalWriteFast(OLED_CS, OLED_CS_INACTIVE); // U8G_ESC_CS(0)
-  changeSpeed(SPICLOCK_30MHz);
+  ChangeSpeed(SPICLOCK_30MHz);
   page_dma.clearComplete();
   page_dma.disable();
   // DmaSpi.h::post_finishCurrentTransfer_impl
@@ -132,7 +132,7 @@ void SH1106_128x64_Driver::Clear() {
 
   SH1106_data_start_seq[2] = 0xb0 | 0;
   digitalWriteFast(OLED_DC, LOW);
-  changeSpeed(SPI_CLOCK_8MHz);
+  ChangeSpeed(SPI_CLOCK_8MHz);
   digitalWriteFast(OLED_CS, OLED_CS_ACTIVE);
   SPI_send(SH1106_data_start_seq, sizeof(SH1106_data_start_seq));
   digitalWriteFast(OLED_DC, HIGH);
@@ -147,9 +147,14 @@ void SH1106_128x64_Driver::Clear() {
 }
 
 /*static*/
-void SH1106_128x64_Driver::SendPage(uint_fast8_t index, const uint8_t *data) {
+void SH1106_128x64_Driver::SendPage(uint_fast8_t index, uint_fast8_t subpage, const uint8_t *data) {
+  int startCol = subpage * kSubpageSize;
+  const uint8_t* startData = data + startCol;
+  
+  SH1106_data_start_seq[0] = 0x10 + (startCol >> 4);
+  SH1106_data_start_seq[1] = 0x00 + (startCol & 0x0F);
   SH1106_data_start_seq[2] = 0xb0 | index;
-  changeSpeed(SPI_CLOCK_8MHz);
+  ChangeSpeed(SPI_CLOCK_8MHz);
   digitalWriteFast(OLED_DC, LOW); // U8G_ESC_ADR(0),           /* instruction mode */
   digitalWriteFast(OLED_CS, OLED_CS_ACTIVE); // U8G_ESC_CS(1),             /* enable chip */
   SPI_send(SH1106_data_start_seq, sizeof(SH1106_data_start_seq)); // u8g_WriteEscSeqP(u8g, dev, u8g_dev_ssd1306_128x64_data_start);
@@ -160,7 +165,7 @@ void SH1106_128x64_Driver::SendPage(uint_fast8_t index, const uint8_t *data) {
   SPI0_SR = 0xFF0F0000;
   SPI0_RSER = SPI_RSER_RFDF_RE | SPI_RSER_RFDF_DIRS | SPI_RSER_TFFF_RE | SPI_RSER_TFFF_DIRS;
 
-  page_dma.sourceBuffer(data, kPageSize);
+  page_dma.sourceBuffer(startData, kSubpageSize);
   page_dma.enable(); // go
 #else
   SPI_send(data, kPageSize);
@@ -215,7 +220,8 @@ void SH1106_128x64_Driver::SPI_send(void *bufr, size_t n) {
 void SH1106_128x64_Driver::AdjustOffset(uint8_t offset) {
 }
 
-void changeSpeed(uint32_t speed) {
+/*static*/
+void SH1106_128x64_Driver::ChangeSpeed(uint32_t speed) {
 	uint32_t ctar = speed;
 	ctar = speed;
 	ctar |= (ctar & 0x0F) << 12;

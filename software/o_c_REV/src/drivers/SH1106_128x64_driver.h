@@ -25,24 +25,26 @@
 
 #include <stdint.h>
 #include <string.h>
-void changeSpeed(uint32_t speed);
 
 struct SH1106_128x64_Driver {
   static constexpr size_t kFrameSize = 128 * 64 / 8;
   static constexpr size_t kNumPages = 8;
+  static constexpr size_t kNumSubpages = 4;
   static constexpr size_t kPageSize = kFrameSize / kNumPages;
+  static constexpr size_t kSubpageSize = kPageSize / 4;
   static constexpr uint8_t kDefaultOffset = 2;
 
   static void Init();
   static void Clear();
   static void Flush();
-  static void SendPage(uint_fast8_t index, const uint8_t *data);
+  static void SendPage(uint_fast8_t index, uint_fast8_t subpage, const uint8_t *data);
   static void SPI_send(void *bufr, size_t n);
 
   // SH1106 ram is 132x64, so it needs an offset to center data in display.
   // However at least one display (mine) uses offset 0 so it's minimally
   // configurable
-  static void AdjustOffset(uint8_t offset);
+  static void AdjustOffset(uint8_t offset); 
+  static void ChangeSpeed(uint32_t speed);
 };
 
 #endif // SH1106_128X64_DRIVER_H_

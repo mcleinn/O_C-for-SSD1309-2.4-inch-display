@@ -19,29 +19,38 @@ public:
 
     current_page_index_ = 0;
     current_page_data_ = NULL;
+	current_subpage_index_ = 0;
   }
 
   void Begin(const uint8_t *frame) {
     current_page_data_ = frame;
     current_page_index_ = 0;
+	current_subpage_index_ = 0;
   }
 
   void Update() {
     uint_fast8_t page = current_page_index_;
+    uint_fast8_t subpage = current_subpage_index_;
     if (page < display_driver::kNumPages) {
       const uint8_t *data = current_page_data_;
-      display_driver::SendPage(page, data);
-      current_page_index_ = page + 1;
-      current_page_data_ = data + display_driver::kPageSize;
+      display_driver::SendPage(page, subpage, data);
+	  current_subpage_index_ = subpage + 1;
     }
   }
 
   bool Flush() {
     display_driver::Flush();
+	if (current_subpage_index_ >= display_driver::kNumSubpages) {	
+      current_subpage_index_ = 0;	
+	  current_page_index_ += 1;
+      const uint8_t *data = current_page_data_;
+	  current_page_data_ = data + display_driver::kPageSize;
+    }
     if (current_page_index_ < display_driver::kNumPages) {
       return false;
     } else {
       current_page_index_ = 0;
+      current_subpage_index_ = 0;
       current_page_data_ = NULL;
       return true;
     }
@@ -53,6 +62,7 @@ public:
 
 private:
   uint_fast8_t current_page_index_;
+  uint_fast8_t current_subpage_index_;
   const uint8_t *current_page_data_;
 
   DISALLOW_COPY_AND_ASSIGN(PagedDisplayDriver);
